@@ -25,6 +25,7 @@ import { SettingsTranslator } from './SettingsTranslator';
 import { ruTranslator } from './dictionary';
 import { startDomTranslation, type Translator } from './domTranslator';
 import { KEEP_AS_IS } from './ru/keepAsIs';
+import { DEMO_GROUPS } from '@irdashies/domain/broadcast/demoField';
 
 const testTranslator: Translator = {
   translateText: (text) => (text.trim() === 'Hello' ? 'Привет' : undefined),
@@ -212,7 +213,19 @@ describe('SettingsTranslator', () => {
 
     // Data on the pages: widget ids in the instance pickers, the default
     // iRacing camera group and the inspector's default telemetry path.
-    const widgetData = ['fuel', 'input', 'Far Chase', 'SessionTime'];
+    const widgetData = [
+      'fuel',
+      'input',
+      'Far Chase',
+      'SessionTime',
+      ...DEMO_GROUPS.flatMap(([, drivers]) =>
+        drivers.flatMap((driver) => [
+          driver.driver.name,
+          driver.driver.name.split(' ').at(-1),
+          driver.carClass.name,
+        ])
+      ),
+    ];
 
     // Tab bars (TabButton) and the radar's section rail. Not by aria-label:
     // that is translated as soon as the page is.
@@ -267,11 +280,13 @@ describe('SettingsTranslator', () => {
         </MemoryRouter>
       );
       await flush();
-      // The broadcast preview draws the overlays, which stay English.
-      container.querySelector('.sticky.w-72')?.setAttribute('translate', 'no');
       const stop = startDomTranslation(container, ruTranslator, {
         onMissing: (text) => {
-          if (!KEEP_AS_IS.has(text) && !widgetData.includes(text)) {
+          if (
+            !KEEP_AS_IS.has(text) &&
+            !widgetData.includes(text) &&
+            !/^\d+(?:\.\d+)?(?:°[CF]| km\/h| mph)$/.test(text)
+          ) {
             missing.add(text);
           }
         },
@@ -317,7 +332,7 @@ describe('SettingsTranslator', () => {
     const pages: [string, Page][] = [
       ...Object.entries(WIDGET_SETTINGS),
       // Shown on the Advanced page rather than one of its own.
-      ['telemetryinspector', TelemetryInspectorSettings],
+      ['telemetryinspector', () => <TelemetryInspectorSettings />],
     ];
 
     it.each(pages)(

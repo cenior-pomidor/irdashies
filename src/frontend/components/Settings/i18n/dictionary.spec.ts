@@ -240,3 +240,42 @@ describe('pluralRu', () => {
     expect(pluralRu(n, forms)).toBe(expected);
   });
 });
+
+describe('2.2 settings and accessibility translation', () => {
+  it.each([
+    ['Move Track Map up', 'Переместить «Карта трассы» вверх'],
+    ['Move Track Map down', 'Переместить «Карта трассы» вниз'],
+    [
+      'Track Map moved up. Position 1 of 3.',
+      '«Карта трассы»: перемещено вверх. Позиция 1 из 3.',
+    ],
+    ['Remove group: Trace', 'Удалить группу: График'],
+    ['Remove Trace from group', 'Удалить из группы: График'],
+    ['Group 2: Trace', 'Группа 2: График'],
+    ['Trace (group 2)', 'График (группа 2)'],
+    ['ABS (available)', 'ABS (доступно)'],
+    [
+      'Driver group for Max Verstappen (123)',
+      'Группа пилота Max Verstappen (123)',
+    ],
+    ['Remove Max Verstappen', 'Удалить: Max Verstappen'],
+    ['Watched Properties (2)', 'Отслеживаемые свойства (2)'],
+    ['· Lap 1', '· Круг 1'],
+    [
+      'Configure the Fuel Calculator layout. Editing: fuel.',
+      'Настройте расположение расчёта топлива. Редактируется: fuel.',
+    ],
+    ['Clear all fuel history?', 'Очистить всю историю расхода топлива?'],
+  ])('translates %s', (english, russian) => {
+    expect(ruTranslator.translateText(english)).toBe(russian);
+  });
+
+  it('reports unknown configuration labels instead of hiding gaps', () => {
+    expect(
+      ruTranslator.translateText('Move Unknown Widget up')
+    ).toBeUndefined();
+    expect(
+      ruTranslator.translateText('Unknown Widget (available)')
+    ).toBeUndefined();
+  });
+});

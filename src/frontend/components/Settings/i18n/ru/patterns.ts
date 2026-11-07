@@ -47,7 +47,100 @@ export const createRuPatterns = (lookup: Lookup): readonly Pattern[] => {
     }
     return undefined;
   };
+  const list = (text: string) => {
+    const values = text.split(', ').map(deep);
+    return values.every((value) => value !== undefined)
+      ? values.join(', ')
+      : undefined;
+  };
   const patterns: Pattern[] = [
+    { match: /^· Lap (\d+)$/, replace: ([, n]) => `· Круг ${n}` },
+
+    {
+      match: /^Move (.+) (up|down)$/,
+      replace: ([, label, direction]) => {
+        const name = deep(label);
+        return name
+          ? `Переместить «${name}» ${direction === 'up' ? 'вверх' : 'вниз'}`
+          : undefined;
+      },
+    },
+    {
+      match: /^(.+) moved (up|down)\. Position (\d+) of (\d+)\.$/,
+      replace: ([, label, direction, position, total]) => {
+        const name = deep(label);
+        return name
+          ? `«${name}»: перемещено ${direction === 'up' ? 'вверх' : 'вниз'}. Позиция ${position} из ${total}.`
+          : undefined;
+      },
+    },
+    {
+      match: /^Remove group: (.+)$/,
+      replace: ([, labels]) => {
+        const names = list(labels);
+        return names ? `Удалить группу: ${names}` : undefined;
+      },
+    },
+    {
+      match: /^Remove (.+) from group$/,
+      replace: ([, label]) => {
+        const name = deep(label);
+        return name ? `Удалить из группы: ${name}` : undefined;
+      },
+    },
+    {
+      match: /^Group (\d+): (.+)$/,
+      replace: ([, n, labels]) => {
+        const names = list(labels);
+        return names ? `Группа ${n}: ${names}` : undefined;
+      },
+    },
+    {
+      match: /^(.+) \(group (\d+)\)$/,
+      replace: ([, label, n]) => {
+        const name = deep(label);
+        return name ? `${name} (группа ${n})` : undefined;
+      },
+    },
+    {
+      match: /^(.+) \(available\)$/,
+      replace: ([, label]) => {
+        const name = deep(label);
+        return name ? `${name} (доступно)` : undefined;
+      },
+    },
+    {
+      match: /^(.+) (mode|total format|label style|units)$/,
+      replace: ([, label, kind]) => {
+        const name = deep(label);
+        const labels: Record<string, string> = {
+          mode: 'Режим',
+          'total format': 'Формат общего значения',
+          'label style': 'Стиль подписи',
+          units: 'Единицы измерения',
+        };
+        return name ? `${labels[kind]}: ${name}` : undefined;
+      },
+    },
+    {
+      match: /^Driver group for (.+)$/,
+      replace: ([, driver]) => `Группа пилота ${driver}`,
+    },
+    {
+      match: /^Remove (.+)$/,
+      replace: ([, label]) => `Удалить: ${deep(label) ?? label}`,
+    },
+    {
+      match: /^Watched Properties \((\d+)\)$/,
+      replace: ([, n]) => `Отслеживаемые свойства (${n})`,
+    },
+    {
+      match:
+        /^Configure the Fuel Calculator layout\. Editing: ([a-z0-9-]+)( \(Gantry\))?\.$/,
+      replace: ([, id, gantry]) =>
+        `Настройте расположение расчёта топлива. Редактируется: ${id}${gantry ?? ''}.`,
+    },
+
     // Settings menu: hidden (unsupported by the running sim) widgets toggle.
     {
       match: /^\((\d+) hidden\)$/,

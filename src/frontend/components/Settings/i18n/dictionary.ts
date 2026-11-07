@@ -4,6 +4,7 @@ import {
   type Translator,
 } from './domTranslator';
 import common from './ru/common';
+import completion from './ru/completion';
 import dialogs from './ru/dialogs';
 import manifests from './ru/manifests';
 import menu from './ru/menu';
@@ -39,6 +40,7 @@ export const buildDictionary = (
 
 export const ruDictionary: ReadonlyMap<string, string> = buildDictionary({
   common,
+  completion,
   menu,
   manifests,
   sections,

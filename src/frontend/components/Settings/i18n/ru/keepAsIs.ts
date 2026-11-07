@@ -12,6 +12,9 @@ export const KEEP_AS_IS: ReadonlySet<string> = new Set([
   'RPM',
   // Units, matrix sizes and class/series names shown as-is
   'px',
+  'P', // Compact position column in broadcast overlays
+  'GTP',
+  'GTD',
   '8x8',
   '16x16',
   'LMP',
